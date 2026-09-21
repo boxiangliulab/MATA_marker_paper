@@ -1,0 +1,18 @@
+#PBS -q normal
+#PBS -l select=1:ncpus=2:mem=300G
+#PBS -l walltime=24:00:00
+#PBS -P 11003054
+#PBS -N step4_vat
+#PBS -o /home/users/nus/e1124850/scratch/qsub_dir/step4_vat.o
+#PBS -e /home/users/nus/e1124850/scratch/qsub_dir/step4_vat.e
+
+
+
+
+source /home/users/nus/e1124850/anaconda3/etc/profile.d/conda.sh
+conda activate ldsc39
+
+
+python /home/users/nus/e1124850/scratch/github/heritability_enrichment_ldsc/round5sqtl/sqtl/step4_vat_h2.py
+
+

@@ -1,0 +1,30 @@
+
+
+pbstemplete = '''#PBS -q normal
+#PBS -l select=1:ncpus=2:mem=200G
+#PBS -l walltime=120:00:00
+#PBS -P 11003054
+#PBS -N vat_h2
+#PBS -o /home/users/nus/e1124850/scratch/qsub_dir/vat_h2.o
+#PBS -e /home/users/nus/e1124850/scratch/qsub_dir/vat_h2.e
+
+source /home/users/nus/e1124850/anaconda3/etc/profile.d/conda.sh
+conda activate snakemake
+
+WORKDIR=/home/users/nus/e1124850/scratch/snakework/vat
+mkdir -p $WORKDIR
+ln -sfn /home/users/nus/e1124850/CELLECT/scripts $WORKDIR/scripts
+cd $WORKDIR
+PYTHONNOUSERSITE=1 snakemake \
+  --use-conda \
+  --conda-frontend conda \
+  --conda-prefix /home/users/nus/e1124850/.snakemake/conda \
+  -j 1 \
+  -s /home/users/nus/e1124850/CELLECT/cellect-ldsc.snakefile \
+  --configfile /home/users/nus/e1124850/scratch/github/heritability_enrichment_ldsc/round4/vatconfig/config_vat.yaml
+'''
+
+
+
+with open('/Users/theeeight/github/heritability_enrichment_ldsc/round4/vatpbs/config_vat.pbs', 'w') as f:
+    f.write(pbstemplete)
