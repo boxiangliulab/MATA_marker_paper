@@ -1,0 +1,21 @@
+order	script	analysis	primary_inputs	primary_outputs
+1	00_pseudobulk/generate_donor_pseudobulk.R	Donor-by-depot-by-cell-type pseudobulk generation	SECTION4_METADATA; SECTION4_SAT_COUNTS; SECTION4_VAT_COUNTS	Raw summed counts and TMM log2(CPM+1) TSV files
+2	00_pseudobulk/prepare_vat_donor_summaries.R	VAT donor group and cell-count preparation	SECTION4_METADATA	VAT_donor_groups.tsv; VAT_ATM_counts_by_donor.tsv
+3	01_macrophage_subtypes/compare_vat_sat_immune_fractions.R	Paired VAT-SAT immune-cell fraction comparison	SECTION4_METADATA	vat_sat_immune_fraction_analysis.rds
+4	01_macrophage_subtypes/prepare_vat_macrophage_embedding.py	VAT macrophage embedding and analysis-table preparation	SECTION4_MACROPHAGE_H5AD	vat_macrophage_embedding.h5ad; vat_macrophage_embedding.tsv
+5	01_macrophage_subtypes/macrophage_marker_deg.py	SAT+VAT one-versus-rest macrophage subtype DEG analysis	Annotated macrophage H5AD	DEG_lv2_subtypes.csv
+6	01_macrophage_subtypes/macrophage_subtype_gsea.R	Macrophage subtype pre-ranked GSEA	SECTION4_GSEA_ROOT/DEG_lv2_subtypes.csv	GSEA TSV files
+7	02_rna_velocity/run_sp_dp_scvelo.py	SP-DP RNA velocity and CellRank directionality	SECTION4_MACROPHAGE_H5AD; SECTION4_VELOCYTO_LOOMS	sp_dp_velocity.h5ad; fate-probability CSV; state summary TXT
+8	03_cell_communication/run_cellphonedb_vat.py	VAT CellPhoneDB permutation analysis	SECTION4_VAT_H5AD; SECTION4_CELLPHONEDB_REFERENCE	CellPhoneDB H5AD and serialized result
+9	03_cell_communication/extract_dp_il1b_interactions.py	DP-ATM IL1B-receptor and pathway interaction summaries	SECTION4_VAT_H5AD; SECTION4_CELLPHONEDB_H5AD; SECTION4_CELLPHONEDB_PKL	Interaction and pathway TSV files
+10	04_module_scores/calculate_inflammation_insulin_scores.R	Inflammation and insulin-signalling module scores	SECTION4_METADATA; SECTION4_COUNT_ROOT	Per-cell RDS and donor-mean TSV files
+11	05_mesothelial_associations/mesothelial_fibrosis_by_dp_status.R	Mesothelial fibrosis genes by DP status	SECTION4_MESOTHELIAL_PSEUDOBULK; SECTION4_VAT_DONOR_GROUPS	mesothelial_fibrosis_by_dp_status.rds
+12	05_mesothelial_associations/dp_tnfa_mesothelial_cytokines.R	DP-ATM TNFA/NFKB score versus mesothelial cytokines	SECTION4_DP_MODULE_SCORES; SECTION4_MESOTHELIAL_PSEUDOBULK; SECTION4_METADATA	dp_tnfa_mesothelial_cytokines.rds
+13	05_mesothelial_associations/mesothelial_cytokines_insulin_signaling.R	Mesothelial cytokines versus insulin signalling	SECTION4_MESOTHELIAL_PSEUDOBULK; SECTION4_MESOTHELIAL_MODULE_SCORES; SECTION4_METADATA	mesothelial_cytokines_insulin_signaling.rds
+14	06_clinical_associations/sp_dp_fraction_association.R	SP- and DP-ATM fraction associations	SECTION4_METADATA	sp_dp_fraction_association.rds; sp_dp_fraction_association_statistics.tsv
+15	06_clinical_associations/sp_dp_fraction_bmi_association.R	SP- and DP-ATM fractions versus BMI	SECTION4_METADATA	sp_dp_fraction_vs_bmi.tsv
+16	06_clinical_associations/dp_status_t2d_association.R	DP status versus T2D	SECTION4_METADATA	dp_status_t2d_association.rds; dp_status_t2d_adjusted_logistic.tsv
+17	06_clinical_associations/dp_status_hba1c_analysis.R	DP abundance/status versus baseline and three-year HbA1c	SECTION4_METADATA	dp_status_hba1c_analysis.tsv
+18	07_sensitivity_analyses/mesothelial_fibrosis_atm_count_adjustment.R	Mesothelial fibrosis models adjusted for ATM abundance	SECTION4_MESOTHELIAL_FIBROSIS_RDS; SECTION4_VAT_ATM_COUNTS	mesothelial_fibrosis_atm_count_adjustment.rds; .tsv
+19	07_sensitivity_analyses/mesothelial_fibrosis_continuous_dp_fraction.R	Mesothelial fibrosis models with continuous DP fraction	SECTION4_MESOTHELIAL_PSEUDOBULK; SECTION4_VAT_ATM_COUNTS; SECTION4_METADATA	mesothelial_fibrosis_continuous_dp_fraction.tsv
+20	07_sensitivity_analyses/t2d_atm_count_adjustment.R	T2D models adjusted for ATM abundance	SECTION4_T2D_STATUS_RDS; SECTION4_VAT_ATM_COUNTS	t2d_atm_count_adjustment.rds; .tsv

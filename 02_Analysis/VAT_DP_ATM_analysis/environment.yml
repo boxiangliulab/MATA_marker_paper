@@ -1,0 +1,29 @@
+name: mata-section4
+channels:
+  - conda-forge
+  - bioconda
+dependencies:
+  - python=3.11
+  - r-base=4.4
+  - scanpy
+  - anndata
+  - scvelo
+  - pandas
+  - numpy
+  - scipy
+  - matplotlib
+  - r-data.table
+  - r-dplyr
+  - r-tidyr
+  - r-readr
+  - r-broom
+  - r-tibble
+  - r-stringr
+  - r-seurat
+  - bioconductor-edger
+  - bioconductor-fgsea
+  - r-msigdbr
+  - pip
+  - pip:
+      - cellrank==2.0.7
+      - omicverse
