@@ -165,7 +165,7 @@ prepare_phenotype_for_contex_biased <- function(depot, chr) {
         )
       } else {
         glmmTMB(
-          expr ~ slingPseudotime_1 + genotype + sex + BMI + Age + log1p_UMI + percent.mt +
+          expr ~ slingPseudotime_1 + diabetic + genotype + sex + BMI + Age + log1p_UMI + percent.mt +
             gPC1 + gPC2 + gPC3 + gPC4 + gPC5 + gPC6 +
             pPC1 + pPC2 + pPC3 + pPC4 + pPC5 + pPC6 + pPC7 + pPC8 + pPC9 + pPC10 +
             (1 | donor_id),
