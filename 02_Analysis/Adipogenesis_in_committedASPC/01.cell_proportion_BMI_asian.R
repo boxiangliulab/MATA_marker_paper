@@ -2,12 +2,18 @@ library(tidyverse)
 library(ggplot2)
 library(cowplot)
 
-OUT_DIR <- "/data/projects/11003054/e1101943/project/01.adipose_sqtl/data/30.adipogenesis/"
+# Project root is 7 levels up from this script
+args0 <- commandArgs(trailingOnly = FALSE)
+script_path <- sub("--file=", "", args0[grep("--file=", args0)])
+project_root <- normalizePath(file.path(dirname(normalizePath(script_path)),
+                                        paste(rep("..", 7), collapse = "/")))
+
+OUT_DIR <- file.path(project_root, "data/30.adipogenesis")
 dir.create(OUT_DIR, showWarnings = FALSE, recursive = TRUE)
 
 # ---------- 0. Data ----------------------------------------------------------
 meta <- read.table(
-  "/data/projects/11003054/e1101943/project/01.adipose_sqtl/data/08.integration_snRNA_object/01.freeze_version/metadata_after_libraryQC_after_ctQC_freeze.tsv",
+  file.path(project_root, "data/08.integration_snRNA_object/01.freeze_version/metadata_after_libraryQC_after_ctQC_freeze.tsv"),
   sep = "\t", header = TRUE
 )
 

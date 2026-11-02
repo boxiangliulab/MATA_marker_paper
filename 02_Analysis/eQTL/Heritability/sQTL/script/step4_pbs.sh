@@ -1,2 +1,0 @@
-qsub /home/users/nus/e1124850/scratch/github/heritability_enrichment_ldsc/round5sqtl/sqtl/step4_vat.pbs
-qsub /home/users/nus/e1124850/scratch/github/heritability_enrichment_ldsc/round5sqtl/sqtl/step4_sat.pbs

@@ -23,9 +23,14 @@ suppressPackageStartupMessages({
 })
 
 # ─── Paths ────────────────────────────────────────────────────────────────────
-BASE_DIR <- paste0("/data/projects/11003054/e1101943/project/01.adipose_sqtl/",
-                   "data/21.differential_expressed_genes/01.pseudobulk/",
-                   "04.only_VAT_vs_SAT_pseudobulk")
+# Project root is 7 levels up from this script
+args0 <- commandArgs(trailingOnly = FALSE)
+script_path <- sub("--file=", "", args0[grep("--file=", args0)])
+project_root <- normalizePath(file.path(dirname(normalizePath(script_path)),
+                                        paste(rep("..", 7), collapse = "/")))
+
+BASE_DIR <- file.path(project_root,
+                      "data/21.differential_expressed_genes/01.pseudobulk/04.only_VAT_vs_SAT_pseudobulk")
 NON_ALL  <- file.path(BASE_DIR, "BMIgrp_non_obese/01.DEG/01.table",
                       "Committed_preadipocyte.non_obese.paired.edgeR.all.tsv")
 OB_ALL   <- file.path(BASE_DIR, "BMIgrp_obese/01.DEG/01.table",

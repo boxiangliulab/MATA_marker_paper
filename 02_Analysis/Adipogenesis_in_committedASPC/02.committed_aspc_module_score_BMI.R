@@ -2,7 +2,7 @@
 #
 # Gene sets (from 06c/06d):
 #   Collagen/fibrosis:
-#     Eisinger2023, NABA_COLLAGENS, REACTOME_COLLAGEN_FORMATION
+#     eighteen_profibrotic_genes, NABA_COLLAGENS, REACTOME_COLLAGEN_FORMATION
 #   Adipogenesis:
 #     TF_adipogenesis, HALLMARK_ADIPOGENESIS, REACTOME_ADIPOGENESIS,
 #     GOBP_WHITE_FAT_CELL_DIFFERENTIATION, KEGG_PPAR_SIGNALING_PATHWAY
@@ -29,9 +29,10 @@ suppressPackageStartupMessages({
   library(data.table)
 })
 
-IN_DIR    <- "/data/projects/11003054/e1101943/project/01.adipose_sqtl/data/30.adipogenesis/committed_aspc_counts"
-META_FILE <- "/data/projects/11003054/e1101943/project/01.adipose_sqtl/data/08.integration_snRNA_object/01.freeze_version/metadata_after_libraryQC_after_ctQC_freeze.tsv"
-OUT_DIR   <- "/data/projects/11003054/e1101943/project/01.adipose_sqtl/data/30.adipogenesis"
+# Set these paths to your local data directories before running
+IN_DIR    <- "./committed_aspc_counts"
+META_FILE <- "./metadata_after_libraryQC_after_ctQC_freeze.tsv"
+OUT_DIR   <- "."
 dir.create(OUT_DIR, showWarnings = FALSE, recursive = TRUE)
 
 COL_VAT <- "#F3AF44"
@@ -47,14 +48,14 @@ GROUP_COLORS <- c(
 
 ASIAN_RACES <- c("Chinese", "Malay", "Indian")
 
-# ── Gene sets ─────────────────────────────────────────────────────────────────
+# -- Gene sets -----------------------------------------------------------------
 cat("Fetching MSigDB gene sets...\n")
 msig_all <- msigdbr(species = "Homo sapiens")
 get_msig <- function(gs) unique(msig_all$gene_symbol[msig_all$gs_name == gs])
 
 GENESETS <- list(
   # Collagen / fibrosis (06c)
-  Eisinger2023 = c(
+  eighteen_profibrotic_genes = c(
     "COL1A1", "COL3A1", "COL6A1", "COL6A3", "LUM", "TNC",
     "COL5A1", "LOX", "FN1", "LOXL1", "LOXL2", "CCN2",
     "TGFB1", "VCAN", "LRP1", "THBS1", "THY1", "ACTA2"
@@ -70,7 +71,7 @@ GENESETS <- list(
 for (nm in names(GENESETS))
   cat(sprintf("  %-35s %d genes\n", nm, length(GENESETS[[nm]])))
 
-# ── 1. Metadata ───────────────────────────────────────────────────────────────
+# -- 1. Metadata ---------------------------------------------------------------
 meta_full <- fread(META_FILE, data.table = FALSE, na.strings = c("", "NA"))
 
 donor_meta <- meta_full %>%
@@ -92,7 +93,7 @@ donor_meta <- meta_full %>%
   select(donor_id, BMI, BMI_group, BMI_group_num, Age, Gender, Race, T2DM) %>%
   distinct(donor_id, .keep_all = TRUE)
 
-# ── 2. Load 10x -> Seurat, normalize, add module scores ──────────────────────
+# -- 2. Load 10x -> Seurat, normalize, add module scores ----------------------
 build_seurat <- function(depot) {
   cat(sprintf("Loading %s ...\n", depot))
   mat <- Read10X(file.path(IN_DIR, depot))
@@ -138,7 +139,7 @@ run_module_scores <- function(seu) {
 seu_sat <- run_module_scores(seu_sat)
 seu_vat <- run_module_scores(seu_vat)
 
-# ── 3. Aggregate per donor (mean module score per donor per depot) ────────────
+# -- 3. Aggregate per donor (mean module score per donor per depot) ------------
 aggregate_scores <- function(seu, depot_name) {
   md <- seu@meta.data
   gs_cols <- names(GENESETS)[names(GENESETS) %in% colnames(md)]
@@ -164,7 +165,7 @@ score_long <- score_df %>%
   pivot_longer(all_of(gs_cols), names_to = "gs_name", values_to = "score") %>%
   mutate(gs_name = factor(gs_name, levels = names(GENESETS)))
 
-# ── 3b. Save per-cell module scores ──────────────────────────────────────────
+# -- 3b. Save per-cell module scores ------------------------------------------
 cell_scores <- bind_rows(
   seu_sat@meta.data %>% mutate(cell_barcode = rownames(.)),
   seu_vat@meta.data %>% mutate(cell_barcode = rownames(.))
@@ -176,7 +177,7 @@ fwrite(cell_scores,
        sep = "\t", quote = FALSE, row.names = FALSE)
 cat("Saved: 02.committed_aspc_module_score_per_cell.tsv.gz\n")
 
-# ── 4. LM + Spearman ─────────────────────────────────────────────────────────
+# -- 4. LM + Spearman ---------------------------------------------------------
 fmt_sci     <- function(p) formatC(p, format = "e", digits = 2)
 safe_covars <- function(df) {
   covars <- c("Age", "Gender", "T2DM", "Race")
@@ -212,7 +213,7 @@ write.table(stats_res,
 cat("\n=== LM results ===\n")
 print(stats_res %>% select(gs_name, Depot, n_donors, lm_beta, lm_p, lm_p_adj, sp_rho))
 
-# ── 4b. Interaction term: BMI_group_num × Depot ───────────────────────────────
+# -- 4b. Interaction term: BMI_group_num x Depot -------------------------------
 # Combined SAT+VAT model to test whether BMI effect differs between depots
 safe_covars_combined <- function(df) {
   covars <- c("Age", "Gender", "T2DM", "Race")
@@ -261,7 +262,7 @@ if (requireNamespace("qvalue", quietly=TRUE)) {
   }
 }
 
-cat("\n=== Interaction: BMI_group_num × Depot ===\n")
+cat("\n=== Interaction: BMI_group_num x Depot ===\n")
 cat("(int_beta = VAT slope minus SAT slope; positive = VAT stronger BMI effect)\n")
 cat("\nRaw p-values:\n")
 print(interaction_res %>% arrange(int_p) %>%
@@ -273,7 +274,17 @@ write.table(interaction_res,
             file.path(OUT_DIR, "02.committed_aspc_module_score_interaction_stats.tsv"),
             sep = "\t", quote = FALSE, row.names = FALSE)
 
-# ── 5. Boxplot (BMI group, facet by depot, one panel per gene set) ────────────
+MODULE_LABELS <- c(
+  eighteen_profibrotic_genes            = "18 literature\nfibrosis genes",
+  NABA_Collagens          = "NABA Collagens",
+  Collagen_Formation      = "Collagen Formation",
+  HALLMARK_ADIPOGENESIS   = "HALLMARK Adipogenesis",
+  REACTOME_ADIPOGENESIS   = "REACTOME Adipogenesis",
+  GOBP_WFC                = "GOBP White Fat Cell Diff.",
+  KEGG_PPAR               = "KEGG PPAR Signaling"
+)
+
+# -- 5. Boxplot (BMI group, facet by depot, one panel per gene set) ------------
 n_labels_box <- score_long %>%
   distinct(donor_id, Depot, BMI_group) %>%
   count(Depot, BMI_group)
@@ -287,7 +298,7 @@ box_plots <- lapply(levels(score_long$gs_name), function(gs) {
     ))
 
   ggplot(df, aes(x = BMI_group, y = score, fill = BMI_group)) +
-    geom_boxplot(outlier.size = 0.4, width = 0.37, color = "grey30", linewidth = 0.3) +
+    geom_boxplot(outlier.size = 0.4, width = 0.25, color = "grey30", linewidth = 0.3) +
     geom_jitter(width = 0.15, size = 0.3, color = "grey40", alpha = 0.5) +
     geom_smooth(aes(x = BMI_group_num, y = score),
                 method = "lm", formula = y ~ x,
@@ -313,37 +324,27 @@ box_plots <- lapply(levels(score_long$gs_name), function(gs) {
 
 ggsave(file.path(OUT_DIR, "02.committed_aspc_module_score_BMI_boxplot.pdf"),
        wrap_plots(box_plots, ncol = 2),
-       width = 5.5, height = length(box_plots) * 1.3, limitsize = FALSE)
+       width = 4.8, height = length(box_plots) * 1.3, limitsize = FALSE)
 cat("Saved: 02.committed_aspc_module_score_BMI_boxplot.pdf\n")
 
-# ── 6. Heatmap: mean z-score per module × BMI group × depot ──────────────────
+# -- 6. Heatmap: mean z-score per module x BMI group x depot ------------------
 # rows = module (fibrosis then adipogenesis), cols = BMI group
 # facet by depot; color = mean z-score; stars = LM significance
 
 GS_GROUPS <- list(
-  Fibrosis     = c("Eisinger2023", "NABA_Collagens", "Collagen_Formation"),
+  Fibrosis     = c("eighteen_profibrotic_genes", "NABA_Collagens", "Collagen_Formation"),
   Adipogenesis = c("HALLMARK_ADIPOGENESIS", "REACTOME_ADIPOGENESIS",
                    "GOBP_WFC", "KEGG_PPAR")
 )
 MODULE_ORDER <- c(rev(GS_GROUPS$Fibrosis), rev(GS_GROUPS$Adipogenesis))
 
-MODULE_LABELS <- c(
-  Eisinger2023            = "18 literature\nfibrosis genes",
-  NABA_Collagens          = "NABA Collagens",
-  Collagen_Formation      = "Collagen Formation",
-  HALLMARK_ADIPOGENESIS   = "HALLMARK Adipogenesis",
-  REACTOME_ADIPOGENESIS   = "REACTOME Adipogenesis",
-  GOBP_WFC                = "GOBP White Fat Cell Diff.",
-  KEGG_PPAR               = "KEGG PPAR Signaling"
-)
-
-# z-score each module × depot across donors
+# z-score each module x depot across donors
 score_z <- score_long %>%
   group_by(gs_name, Depot) %>%
   mutate(score_z = as.numeric(scale(score))) %>%
   ungroup()
 
-# mean z-score per module × depot × BMI group
+# mean z-score per module x depot x BMI group
 heat_df <- score_z %>%
   group_by(gs_name, Depot, BMI_group) %>%
   summarise(mean_z = mean(score_z, na.rm = TRUE), .groups = "drop") %>%

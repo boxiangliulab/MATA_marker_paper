@@ -1,11 +1,15 @@
+import pathlib
 import scanpy as sc
 import scipy.io
 import pandas as pd
 import numpy as np
 import os
 
-H5AD = "/data/projects/11003054/e1101943/project/01.adipose_sqtl/data/08.integration_snRNA_object/01.freeze_version/SATA_integrated_obj_83_lib_freeze.h5ad"
-OUT_BASE = "/data/projects/11003054/e1101943/project/01.adipose_sqtl/data/30.adipogenesis/committed_aspc_counts"
+# Project root is 7 levels up from this script
+PROJECT_ROOT = pathlib.Path(__file__).resolve().parents[7]
+
+H5AD = str(PROJECT_ROOT / "data/08.integration_snRNA_object/01.freeze_version/SATA_integrated_obj_83_lib_freeze.h5ad")
+OUT_BASE = str(PROJECT_ROOT / "data/30.adipogenesis/committed_aspc_counts")
 
 ASIAN_RACES   = ["Chinese", "Malay", "Indian"]
 CELL_TYPE     = "Committed_preadipocyte"

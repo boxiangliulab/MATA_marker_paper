@@ -23,9 +23,15 @@ suppressPackageStartupMessages({
   library(patchwork)
 })
 
-IN_DIR    <- "/data/projects/11003054/e1101943/project/01.adipose_sqtl/data/30.adipogenesis/03.committed_aspc_pseudobulk"
-META_FILE <- "/data/projects/11003054/e1101943/project/01.adipose_sqtl/data/08.integration_snRNA_object/01.freeze_version/metadata_after_libraryQC_after_ctQC_freeze.tsv"
-OUT_DIR   <- "/data/projects/11003054/e1101943/project/01.adipose_sqtl/data/30.adipogenesis"
+# Project root is 7 levels up from this script
+args0 <- commandArgs(trailingOnly = FALSE)
+script_path <- sub("--file=", "", args0[grep("--file=", args0)])
+project_root <- normalizePath(file.path(dirname(normalizePath(script_path)),
+                                        paste(rep("..", 7), collapse = "/")))
+
+IN_DIR    <- file.path(project_root, "data/30.adipogenesis/03.committed_aspc_pseudobulk")
+META_FILE <- file.path(project_root, "data/08.integration_snRNA_object/01.freeze_version/metadata_after_libraryQC_after_ctQC_freeze.tsv")
+OUT_DIR   <- file.path(project_root, "data/30.adipogenesis")
 
 DEPOT_COLORS <- c(SAT = "#67B3AD", VAT = "#F3AF44")
 
@@ -36,7 +42,7 @@ get_msig <- function(gs) unique(msig_all$gene_symbol[msig_all$gs_name == gs])
 
 GENESETS <- list(
   # Fibrosis
-  Eisinger2023       = c("COL1A1","COL3A1","COL6A1","COL6A3","LUM","TNC",
+  eighteen_pro_fibrotic_genes       = c("COL1A1","COL3A1","COL6A1","COL6A3","LUM","TNC",
                          "COL5A1","LOX","FN1","LOXL1","LOXL2","CCN2",
                          "TGFB1","VCAN","LRP1","THBS1","THY1","ACTA2"),
   NABA_Collagens     = get_msig("NABA_COLLAGENS"),
@@ -49,7 +55,7 @@ GENESETS <- list(
 )
 
 GS_GROUPS <- list(
-  Fibrosis     = c("Eisinger2023", "NABA_Collagens", "Collagen_Formation"),
+  Fibrosis     = c("eighteen_pro_fibrotic_genes", "NABA_Collagens", "Collagen_Formation"),
   Adipogenesis = c("HALLMARK", "REACTOME", "GOBP_WFC", "KEGG_PPAR")
 )
 
@@ -331,14 +337,14 @@ fib_order    <- stats %>%
   union(fib_sig)
 
 fib_annot <- tibble(gene = fib_sig) %>%
-  mutate(Eisinger2023       = gene %in% GENESETS[["Eisinger2023"]],
+  mutate(eighteen_pro_fibrotic_genes       = gene %in% GENESETS[["eighteen_pro_fibrotic_genes"]],
          NABA_Collagens     = gene %in% GENESETS[["NABA_Collagens"]],
          Collagen_Formation = gene %in% GENESETS[["Collagen_Formation"]]) %>%
   pivot_longer(-gene, names_to = "gs_name", values_to = "member") %>%
   mutate(gs_name = factor(gs_name, levels = GS_GROUPS$Fibrosis))
 
 fib_gs_labels <- c(
-  Eisinger2023       = "Eisinger\n2023",
+  eighteen_pro_fibrotic_genes       = "Eisinger\n2023",
   NABA_Collagens     = "NABA\nCollagens",
   Collagen_Formation = "Collagen\nFormation"
 )

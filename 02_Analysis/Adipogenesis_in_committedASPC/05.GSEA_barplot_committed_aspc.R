@@ -10,14 +10,18 @@ suppressPackageStartupMessages({
   library(stringr)
 })
 
-GSEA_DIR <- paste0("/data/projects/11003054/e1101943/project/01.adipose_sqtl/",
-                   "data/21.differential_expressed_genes/01.pseudobulk/",
-                   "04.only_VAT_vs_SAT_pseudobulk/linear_model/interation_term/",
-                   "tables/GSEA")
-OUT_DIR  <- paste0("/data/projects/11003054/e1101943/project/01.adipose_sqtl/",
-                   "data/21.differential_expressed_genes/01.pseudobulk/",
-                   "04.only_VAT_vs_SAT_pseudobulk/linear_model/interation_term/",
-                   "plots")
+# Project root is 7 levels up from this script
+args0 <- commandArgs(trailingOnly = FALSE)
+script_path <- sub("--file=", "", args0[grep("--file=", args0)])
+project_root <- normalizePath(file.path(dirname(normalizePath(script_path)),
+                                        paste(rep("..", 7), collapse = "/")))
+
+GSEA_DIR <- file.path(project_root,
+                      "data/21.differential_expressed_genes/01.pseudobulk",
+                      "04.only_VAT_vs_SAT_pseudobulk/linear_model/interation_term/tables/GSEA")
+OUT_DIR  <- file.path(project_root,
+                      "data/21.differential_expressed_genes/01.pseudobulk",
+                      "04.only_VAT_vs_SAT_pseudobulk/linear_model/interation_term/plots")
 
 CT <- "Committed_preadipocyte"
 
