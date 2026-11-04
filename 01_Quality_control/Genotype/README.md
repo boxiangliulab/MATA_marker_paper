@@ -1,3 +1,9 @@
 # Genotype data QC
 
-Wang Wenjing (e1101919@u.nus.edu) and Qin Yixian (e1353486@u.nus.edu): please discuss and upload all necessary steps.
+Scripts for genotype quality control and imputation. Run in order:
+
+| Script | Description |
+| --- | --- |
+| `01_beforeimpu.sh` | Pre-imputation QC |
+| `02_imputation_results.sh` | Processing of imputation results |
+| `03_after_imputation_qc.sh` | Post-imputation QC |
