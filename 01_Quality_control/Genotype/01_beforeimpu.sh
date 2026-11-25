@@ -5,11 +5,9 @@
 #PBS -N beforeimpu
 #PBS -o beforeimpu.o
 #PBS -e beforeimpu.e
-#PBS -P 11003054
 
 # Before imputation Genotype QC pipeline (Suitable for GWAS, QTL analysis and demultiplex)
 # Author: Wang Wenjing
-# Version: 2.0
 
 # =============== Initial Preparation ===============
 # Path and Parameter should be defined firstly
