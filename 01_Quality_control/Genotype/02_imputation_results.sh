@@ -4,7 +4,7 @@
 #PBS -N imputation_results
 #PBS -o imputation_results.o
 #PBS -e imputation_results.e
-#PBS -P 11003054
+
 
 module load parallel
 
